@@ -89,8 +89,8 @@ export default class {
     if (this.counter === undefined || this.id !== bill.id) this.counter = 0
     if (this.id === undefined || this.id !== bill.id) this.id = bill.id
     if (this.counter % 2 === 0) {
-      bills.forEach(b => {
-        $(`#open-bill${b.id}`).css({ background: '#0D5AE5' })
+      bills.forEach(bill => {
+        $(`#open-bill${bill.id}`).css({ background: '#0D5AE5'})
       })
       $(`#open-bill${bill.id}`).css({ background: '#2A2B35' })
       $('.dashboard-right-container div').html(DashboardFormUI(bill))
@@ -146,12 +146,14 @@ export default class {
     }
 
     bills.forEach(bill => {
-      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
+      $(`#open-bill${bill.id}`).unbind('click').click((e) => this.handleEditTicket(e, bill, bills))
+      
     })
 
     return bills
 
   }
+
 
   getBillsAllUsers = () => {
     if (this.store) {
