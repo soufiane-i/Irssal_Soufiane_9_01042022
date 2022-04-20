@@ -13,12 +13,10 @@
  
  jest.mock("../app/store", () => mockStore)
 
-
-
-
  describe("Given I am connected as an employee", () => {
   describe("When I submit a new Bill", () => {
-    test("Then must save the bill", async () => {
+    // Vérifie que le bill se sauvegarde
+    test("Then save the bill", async () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
@@ -28,20 +26,82 @@
         type: "Employee"
       }))
   
-      document.body.innerHTML = NewBillUI()
+      const html = NewBillUI()
+      document.body.innerHTML = html
   
-      const newBillInit = new NewBill({
+      const newBill = new NewBill({
         document, onNavigate, store: null, localStorage: window.localStorage
       })
   
       const formNewBill = screen.getByTestId("form-new-bill")
       expect(formNewBill).toBeTruthy()
       
-      const handleSubmit = jest.fn((e) => newBillInit.handleSubmit(e));
+      const handleSubmit = jest.fn((e) => newBill.handleSubmit(e));
       formNewBill.addEventListener("submit", handleSubmit);
+      fireEvent.submit(formNewBill);
+      expect(handleSubmit).toHaveBeenCalled();
+    });
+
+    // Récupère et vérifie les bills
+    test("Then fetches bills from mock API POST", async () => {
+      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+      window.onNavigate(ROUTES_PATH.NewBill)
+    })
+
+    // Vérifie si un fichier est bien chargé
+    test("Then verify the file bill", async() => {
+      jest.spyOn(mockStore, "bills")
+      Object.defineProperty(
+          window,
+          "localStorage",
+          { value: localStorageMock }
+      )
+      window.localStorage.setItem("user", JSON.stringify({
+        type: "Employee",
+        email: "a@a"
+      }))
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.appendChild(root)
+      router()
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock })
+      Object.defineProperty(window, "location", { value: { hash: ROUTES_PATH['NewBill']} })
+      window.localStorage.setItem("user", JSON.stringify({
+        type: "Employee"
+      }))
+
+      const newBill = new NewBill({
+        document, onNavigate, store: mockStore, localStorage: window.localStorage
+      })
+
+      const file = new File(['image'], 'image.png', {type: 'image/png'});
+      const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
+      const formNewBill = screen.getByTestId("form-new-bill")
+      const billFile = screen.getByTestId('file');
+
+      billFile.addEventListener("change", handleChangeFile);     
+      userEvent.upload(billFile, file)
+      
+      expect(billFile.files[0].name).toBeDefined()
+      expect(handleChangeFile).toBeCalled()
+     
+      const handleSubmit = jest.fn((e) => newBill.handleSubmit(e));
+      formNewBill.addEventListener("submit", handleSubmit);     
       fireEvent.submit(formNewBill);
       expect(handleSubmit).toHaveBeenCalled();
     })
   })
 })
+
+
+
 
