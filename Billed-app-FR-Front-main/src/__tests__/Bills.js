@@ -1,22 +1,17 @@
 /**
  * @jest-environment jsdom
  */
- import * as jQuery from 'jquery';
-import '@testing-library/jest-dom'
-import {screen, waitFor, fireEvent, getAllByTestId} from "@testing-library/dom"
-import userEvent from '@testing-library/user-event'
-import BillsUI from "../views/BillsUI.js"
-import { bills } from "../fixtures/bills.js"
-import { ROUTES, ROUTES_PATH } from "../constants/routes"
-import {localStorageMock} from "../__mocks__/localStorage.js";
-import mockStore from "../__mocks__/store"
-import Actions from './Actions.js'
 
-
-import Bills from '../containers/Bills.js'
-import { handleClickIconEye } from '../containers/Bills.js'
-import { getBills } from '../containers/Bills.js'
-import router from "../app/Router.js";
+ import {screen, waitFor, fireEvent} from "@testing-library/dom";
+ import BillsUI from "../views/BillsUI.js";
+ import { bills } from "../fixtures/bills.js"
+ import { ROUTES,ROUTES_PATH } from "../constants/routes.js";
+ import {localStorageMock} from "../__mocks__/localStorage.js";
+ import mockStore from "../__mocks__/store";
+ import "@testing-library/jest-dom";
+ import Bills from "../containers/Bills.js";
+ import userEvent from "@testing-library/user-event";
+ import router from "../app/Router.js";
 
 
 jest.mock("../app/store", () => mockStore)
@@ -44,9 +39,6 @@ describe("Given I am connected as an employee", () => {
       expect(dates).toEqual(datesSorted)
     })
     describe('When i click on a eye btn to show the bill picture', () => {
-
-    })
-    describe("When I click on newBill button",  () => {
       test('it show new bill form', async () => {
         localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
         const root = document.createElement("div")
@@ -58,9 +50,32 @@ describe("Given I am connected as an employee", () => {
         const newBillContainer = screen.getByTestId('btn-new-bill')
         fireEvent.click(newBillContainer)
         expect(newBillContainer).toBeTruthy()
-        
       })
     })
+    describe("When I click on the eye icon", () => {
+      test("Then show picture modal", async () => {
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+        Object.defineProperty(window, "localStorage", { value: localStorageMock })
+        window.localStorage.setItem("user", JSON.stringify({
+          type: "Employee"
+        }))
+        const newBills = new Bills({
+          document, onNavigate, store: null, localStorage: window.localStorage
+        })
+        document.body.innerHTML = BillsUI({ data: bills })
+        const handleClickIconEye = jest.fn((icon) => newBills.handleClickIconEye(icon));
+        const iconEye = screen.getAllByTestId("icon-eye");
+        const modaleFile = document.getElementById("modaleFile")
+        $.fn.modal = jest.fn(() => modaleFile.classList.add("show"))
+        iconEye.forEach((icon) => {
+          icon.addEventListener("click", handleClickIconEye(icon))
+          userEvent.click(icon)
+          expect(handleClickIconEye).toHaveBeenCalled()
+        })
+        expect(modaleFile).toHaveClass("show")
+      })
 
     /* describe("When I click on the eye icon",  () => {
       test('it show the image associate to the bill', async () => {
@@ -90,6 +105,7 @@ describe("Given I am connected as an employee", () => {
       
       })
     }) */
+    })
   })
 })
 
@@ -128,7 +144,6 @@ describe("Given I am connected as an employee", () => {
       document.body.appendChild(root)
       router()
     }) 
-
     test("fetches bills from an API and fails with 404 message error", async () => {
 
       mockStore.bills.mockImplementationOnce(() => {
