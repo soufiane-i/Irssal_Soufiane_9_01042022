@@ -76,35 +76,29 @@ describe("Given I am connected as an employee", () => {
         })
         expect(modaleFile).toHaveClass("show")
       })
-
-    /* describe("When I click on the eye icon",  () => {
-      test('it show the image associate to the bill', async () => {
-        localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
-        const root = document.createElement("div")
-        root.setAttribute("id", "root")
-        document.body.append(root)
-        router()
-        window.onNavigate(ROUTES_PATH.Bills)
-
-        window.$ = jest.fn().mockImplementation(() => {
-          return {
-             modal: jest.fn(),
-             click: jest.fn(),
-             width: jest.fn(),
-             find: jest.fn()
-           }
-       });
-        
-        await waitFor(() => screen.getAllByTestId('icon-eye')[0])
-        const handleClickIconEye = await jest.fn(bills[0].handleClickIconEye)
-        const eye = document.querySelectorAll('.eye')[0]
-        eye.addEventListener('click', handleClickIconEye)
-        userEvent.click(eye) 
-        expect(handleClickIconEye).toHaveBeenCalled() 
- 
-      
+    })
+    describe("When I click on NewBill Button", () => {
+      // Vérifie si le formulaire de création de bills apparait
+      test("Then the new bill form appear", async () => {
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+        Object.defineProperty(window, "localStorage", { value: localStorageMock })
+        window.localStorage.setItem("user", JSON.stringify({
+          type: "Employee"
+        }))
+        const newBills = new Bills({
+          document, onNavigate, store: null, localStorage: window.localStorage
+        })
+        document.body.innerHTML = BillsUI({ data: bills })
+        const handleClickNewBill = jest.fn(() => newBills.handleClickNewBill ())
+        const btnNewBill = screen.getByTestId("btn-new-bill")
+        btnNewBill.addEventListener("click", handleClickNewBill)
+        userEvent.click(btnNewBill)
+        expect(handleClickNewBill).toHaveBeenCalled()
+        await waitFor(() => screen.getByTestId("form-new-bill"))
+        expect(screen.getByTestId("form-new-bill")).toBeTruthy()
       })
-    }) */
     })
   })
 })
