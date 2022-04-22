@@ -15,7 +15,6 @@
 
  describe("Given I am connected as an employee", () => {
   describe("When I submit a new Bill", () => {
-    // Vérifie que le bill se sauvegarde
     test("Then save the bill", async () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
@@ -42,7 +41,6 @@
       expect(handleSubmit).toHaveBeenCalled();
     });
 
-    // Récupère et vérifie les bills
     test("Then fetches bills from mock API POST", async () => {
       localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
       const root = document.createElement("div")
@@ -52,7 +50,6 @@
       window.onNavigate(ROUTES_PATH.NewBill)
     })
 
-    // Vérifie si un fichier est bien chargé
     test("Then verify the file bill", async() => {
       jest.spyOn(mockStore, "bills")
       Object.defineProperty(
