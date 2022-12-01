@@ -2,5 +2,5 @@
 
 ## Installation
 - Download
-- Extract 
-- Open index.htmf
+- To use Back-end, follow readme inside its folder
+- To use Front-end, follow readme inside its folder
